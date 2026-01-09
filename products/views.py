@@ -129,12 +129,11 @@ class OrderViewSet(viewsets.ModelViewSet):
             
             cart_item.product.stock_quantity -= cart_item.quantity
             cart_item.product.save()
-        
-        cart_items.delete()
-        try:
-            self.send_order_email(request.user, order)
-        except Exception as e:
-            print(f"Email failed: {e}")
+            cart_items.delete()
+        # try:
+        #     self.send_order_email(request.user, order)
+        # except Exception as e:
+        #     print(f"Email failed: {e}")
             Notification.objects.create(
                 user=request.user,
                 title="Order Placed Successfully! 🎉",
