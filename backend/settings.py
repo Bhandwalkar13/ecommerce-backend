@@ -31,8 +31,14 @@ DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 ALLOWED_HOSTS = [
     'localhost',
     '127.0.0.1',
-    '.railway.app',  # Railway domain
-    '.vercel.app',   # Vercel domain
+     # Railway domain
+    '.vercel.app',  
+    'ecommerce-backend-6i5c.onrender.com',
+]
+
+CSRF_TRUSTED_ORIGINS = [
+    'https://ecommerce-backend-6i5c.onrender.com',
+    'https://*.vercel.app',
 ]
 
 
@@ -152,13 +158,7 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
     "http://127.0.0.1:5173",
     "https://ecommerce-backend-6i5c.onrender.com",
-    "https://ecommerce-frontend-kappa-henna.vercel.app/",  
-    # Add your Vercel URL after deployment
 ]
-
-#CORS_ALLOW_ALL_ORIGINS = True  # For testing, remove in production
-
-
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework_simplejwt.authentication.JWTAuthentication',
