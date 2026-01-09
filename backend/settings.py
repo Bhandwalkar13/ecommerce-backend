@@ -152,10 +152,11 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
     "http://127.0.0.1:5173",
     "https://ecommerce-backend-6i5c.onrender.com",
+    "https://ecommerce-frontend-kappa-henna.vercel.app/",  
     # Add your Vercel URL after deployment
 ]
 
-CORS_ALLOW_ALL_ORIGINS = True  # For testing, remove in production
+#CORS_ALLOW_ALL_ORIGINS = True  # For testing, remove in production
 
 
 REST_FRAMEWORK = {
