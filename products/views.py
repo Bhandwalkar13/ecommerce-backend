@@ -148,73 +148,74 @@ class OrderViewSet(viewsets.ModelViewSet):
     def generate_tracking_number(self):
         import random
         import string
-        return 'TRK' + ''.join(random.choices(string.digits, k=10))\
+        return 'TRK' + ''.join(random.choices(string.digits, k=10))
     
-        def send_order_email(self, user, order):
-            try:
-                subject = f'Order Confirmation #{order.id} - ShopHub'
-                message = f'''Hi {user.username},
-                Thank you for your order!
-                Order Details:
-                - Order ID: #{order.id}
-                - Total Amount: ₹{order.final_amount}
-                - Discount: ₹{order.discount_amount}
-                - Payment Method: {order.payment_method}
-                - Tracking Number: {order.tracking_number}
-                - Estimated Delivery: {order.estimated_delivery}
-                Items:
+    def send_order_email(self, user, order):
+        try:
+            subject = f'Order Confirmation #{order.id} - ShopHub'
+            message = f'''Hi {user.username},
+            Thank you for your order!
+            Order Details:
+            - Order ID: #{order.id}
+            - Total Amount: ₹{order.final_amount}
+            - Discount: ₹{order.discount_amount}
+            - Payment Method: {order.payment_method}
+            - Tracking Number: {order.tracking_number}
+            - Estimated Delivery: {order.estimated_delivery}
+            Items:
+            '''
+            for item in order.items.all():
+                message += f'\n- {item.product_name} x {item.quantity} = ₹{item.product_price * item.quantity}'
+                message += f'''
+                Shipping Address:
+                {order.shipping_address}
+                Track your order at: https://ecommerce-frontend-kappa-henna.vercel.app
+                Thank you for shopping with us!
+                ShopHub Team
                 '''
-                for item in order.items.all():
-                    message += f'\n- {item.product_name} x {item.quantity} = ₹{item.product_price * item.quantity}'
-                    message += f'''
-                    Shipping Address:
-                    {order.shipping_address}
-                    Track your order at: https://ecommerce-frontend-kappa-henna.vercel.app
-                    Thank you for shopping with us!
-                    ShopHub Team
-                    '''
-                    send_mail(
-                        subject,
-                        message,
-                        settings.DEFAULT_FROM_EMAIL,
-                        [user.email] if user.email else [],
-                        fail_silently=True,
-                        )
-            except Exception as e:
-                print(f"Failed to send email: {e}")
-                @action(detail=True, methods=['patch'])
-                def update_status(self, request, pk=None):
-                    if not request.user.is_staff:
-                        return Response({'error': 'Not authorized'}, status=status.HTTP_403_FORBIDDEN)
-                        order = self.get_object()
-                        new_status = request.data.get('status')
-                        if new_status in dict(Order.STATUS_CHOICES):
-                            order.status = new_status
-                            order.save()
-                            subject = f'Order Status Update #{order.id} - ShopHub'
-                            message = f'''
-                            Hi {order.user.username},
-                            Your order #{order.id} status has been updated to: {new_status}
-                            Tracking Number: {order.tracking_number}
-                            Estimated Delivery: {order.estimated_delivery}
-                            Thank you for your patience!
-                            ShopHub Team
-                            '''
-                            send_mail(
-                                subject,
-                                message,
-                                settings.DEFAULT_FROM_EMAIL,
-                                [order.user.email] if order.user.email else [],
-                                fail_silently=True,
-                                )
-                Notification.objects.create(
-                    user=order.user,
-                    title=f"Order {new_status} 📦",
-                    message=f"Your order #{order.id} is now: {new_status}",
-                    notification_type="order_status"
+                send_mail(
+                    subject,
+                    message,
+                    settings.DEFAULT_FROM_EMAIL,
+                    [user.email] if user.email else [],
+                    fail_silently=True,
                     )
-                return Response(self.get_serializer(order).data)
-                return Response({'error': 'Invalid status'}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            print(f"Failed to send email: {e}")
+
+    @action(detail=True, methods=['patch'])
+    def update_status(self, request, pk=None):
+        if not request.user.is_staff:
+            return Response({'error': 'Not authorized'}, status=status.HTTP_403_FORBIDDEN)
+        order = self.get_object()
+        new_status = request.data.get('status')
+        if new_status in dict(Order.STATUS_CHOICES):
+            order.status = new_status
+            order.save()
+            subject = f'Order Status Update #{order.id} - ShopHub'
+            message = f'''
+            Hi {order.user.username},
+            Your order #{order.id} status has been updated to: {new_status}
+            Tracking Number: {order.tracking_number}
+            Estimated Delivery: {order.estimated_delivery}
+            Thank you for your patience!
+            ShopHub Team
+            '''
+            send_mail(
+                subject,
+                message,
+                settings.DEFAULT_FROM_EMAIL,
+                [order.user.email] if order.user.email else [],
+                fail_silently=True,
+            )
+            Notification.objects.create(
+                user=order.user,
+                title=f"Order {new_status} 📦",
+                message=f"Your order #{order.id} is now: {new_status}",
+                notification_type="order_status"
+            )
+            return Response(self.get_serializer(order).data)
+        return Response({'error': 'Invalid status'}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class CartViewSet(viewsets.ModelViewSet):
