@@ -1,6 +1,7 @@
 from django.contrib.auth.models import User
 from rest_framework import serializers, generics
 
+
 # Serializer for user registration
 class RegisterSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True)

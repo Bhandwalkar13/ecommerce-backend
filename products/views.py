@@ -177,7 +177,8 @@ class OrderViewSet(viewsets.ModelViewSet):
         Shipping Address:
         {order.shipping_address}
 
-        Track your order at: http://127.0.0.1:5173
+        Track your order at: https://ecommerce-frontend-kappa-henna.vercel.app
+
 
         Thank you for shopping with us!
 
