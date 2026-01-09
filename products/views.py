@@ -180,41 +180,41 @@ class OrderViewSet(viewsets.ModelViewSet):
                         [user.email] if user.email else [],
                         fail_silently=True,
                         )
-                        except Exception as e:
-                            print(f"Failed to send email: {e}")
-                            @action(detail=True, methods=['patch'])
-                            def update_status(self, request, pk=None):
-                                if not request.user.is_staff:
-                                    return Response({'error': 'Not authorized'}, status=status.HTTP_403_FORBIDDEN)
-                                    order = self.get_object()
-                                    new_status = request.data.get('status')
-                                    if new_status in dict(Order.STATUS_CHOICES):
-                                        order.status = new_status
-                                        order.save()
-                                        subject = f'Order Status Update #{order.id} - ShopHub'
-                                        message = f'''
-                                        Hi {order.user.username},
-                                        Your order #{order.id} status has been updated to: {new_status}
-                                        Tracking Number: {order.tracking_number}
-                                        Estimated Delivery: {order.estimated_delivery}
-                                        Thank you for your patience!
-                                        ShopHub Team
-                                        '''
-                                        send_mail(
-                                            subject,
-                                            message,
-                                            settings.DEFAULT_FROM_EMAIL,
-                                            [order.user.email] if order.user.email else [],
-                                            fail_silently=True,
-                                            )
-                                            Notification.objects.create(
-                                                user=order.user,
-                                                title=f"Order {new_status} 📦",
-                                                message=f"Your order #{order.id} is now: {new_status}",
-                                                notification_type="order_status"
-                                                )
-                                                return Response(self.get_serializer(order).data)
-                                                return Response({'error': 'Invalid status'}, status=status.HTTP_400_BAD_REQUEST)
+            except Exception as e:
+                print(f"Failed to send email: {e}")
+                @action(detail=True, methods=['patch'])
+                def update_status(self, request, pk=None):
+                    if not request.user.is_staff:
+                        return Response({'error': 'Not authorized'}, status=status.HTTP_403_FORBIDDEN)
+                        order = self.get_object()
+                        new_status = request.data.get('status')
+                        if new_status in dict(Order.STATUS_CHOICES):
+                            order.status = new_status
+                            order.save()
+                            subject = f'Order Status Update #{order.id} - ShopHub'
+                            message = f'''
+                            Hi {order.user.username},
+                            Your order #{order.id} status has been updated to: {new_status}
+                            Tracking Number: {order.tracking_number}
+                            Estimated Delivery: {order.estimated_delivery}
+                            Thank you for your patience!
+                            ShopHub Team
+                            '''
+                            send_mail(
+                                subject,
+                                message,
+                                settings.DEFAULT_FROM_EMAIL,
+                                [order.user.email] if order.user.email else [],
+                                fail_silently=True,
+                                )
+                Notification.objects.create(
+                    user=order.user,
+                    title=f"Order {new_status} 📦",
+                    message=f"Your order #{order.id} is now: {new_status}",
+                    notification_type="order_status"
+                    )
+                return Response(self.get_serializer(order).data)
+                return Response({'error': 'Invalid status'}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class CartViewSet(viewsets.ModelViewSet):
