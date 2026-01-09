@@ -133,17 +133,17 @@ class OrderViewSet(viewsets.ModelViewSet):
         cart_items.delete()
         try:
             self.send_order_email(request.user, order)
-            except Exception as e:
-                print(f"Email failed: {e}")
-                Notification.objects.create(
-                    user=request.user,
-                    title="Order Placed Successfully! 🎉",
-                    message=f"Your order #{order.id} has been placed. Total: ₹{final_amount}. Tracking: {order.tracking_number}",
-                    notification_type="order"
-                )
-                serializer = self.get_serializer(order)
-                return Response(serializer.data, status=status.HTTP_201_CREATED)
-                
+        except Exception as e:
+            print(f"Email failed: {e}")
+            Notification.objects.create(
+                user=request.user,
+                title="Order Placed Successfully! 🎉",
+                message=f"Your order #{order.id} has been placed. Total: ₹{final_amount}. Tracking: {order.tracking_number}",
+                notification_type="order"
+            )
+            serializer = self.get_serializer(order)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+            
     
     def generate_tracking_number(self):
         import random
