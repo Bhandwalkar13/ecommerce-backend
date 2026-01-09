@@ -133,7 +133,13 @@ class OrderViewSet(viewsets.ModelViewSet):
         cart_items.delete()
         
         # Send Email Notification
-        self.send_order_email(request.user, order)
+        # Send Email Notification (non-blocking)
+try:
+    self.send_order_email(request.user, order)
+except Exception as e:
+    print(f"Email failed: {e}")
+    # Continue without failing the order
+
         
         # Create notification
         Notification.objects.create(
@@ -152,46 +158,48 @@ class OrderViewSet(viewsets.ModelViewSet):
         return 'TRK' + ''.join(random.choices(string.digits, k=10))
     
     def send_order_email(self, user, order):
-        subject = f'Order Confirmation #{order.id} - ShopHub'
-        message = f'''
-        Hi {user.username},
+    subject = f'Order Confirmation #{order.id} - ShopHub'
+    message = f'''Hi {user.username},
 
-        Thank you for your order!
+Thank you for your order!
 
-        Order Details:
-        - Order ID: #{order.id}
-        - Total Amount: ₹{order.final_amount}
-        - Discount: ₹{order.discount_amount}
-        - Payment Method: {order.payment_method}
-        - Tracking Number: {order.tracking_number}
-        - Estimated Delivery: {order.estimated_delivery}
+Order Details:
+- Order ID: #{order.id}
+- Total Amount: ₹{order.final_amount}
+- Discount: ₹{order.discount_amount}
+- Payment Method: {order.payment_method}
+- Tracking Number: {order.tracking_number}
+- Estimated Delivery: {order.estimated_delivery}
 
-        Items:
-        '''
+Items:
+'''
+    
+    for item in order.items.all():
+        message += f'\n- {item.product_name} x {item.quantity} = ₹{item.product_price * item.quantity}'
+    
+    message += f'''
+
+Shipping Address:
+{order.shipping_address}
+
+Track your order at: https://ecommerce-frontend-kappa-henna.vercel.app
+
+Thank you for shopping with us!
+
+ShopHub Team
+'''
+    
+    send_mail(
+        subject,
+        message,
+        settings.DEFAULT_FROM_EMAIL,
+        [user.email] if user.email else [],
+        fail_silently=True,
+    )
+    except Exception as e:
+        print(f"Failed to send email: {e}")
+
         
-        for item in order.items.all():
-            message += f'\n- {item.product_name} x {item.quantity} = ₹{item.product_price * item.quantity}'
-        
-        message += f'''
-
-        Shipping Address:
-        {order.shipping_address}
-
-        Track your order at: https://ecommerce-frontend-kappa-henna.vercel.app
-
-
-        Thank you for shopping with us!
-
-        ShopHub Team
-        '''
-        
-        send_mail(
-            subject,
-            message,
-            settings.DEFAULT_FROM_EMAIL,
-            [user.email] if user.email else [],
-            fail_silently=True,
-        )
     
     @action(detail=True, methods=['patch'])
     def update_status(self, request, pk=None):
