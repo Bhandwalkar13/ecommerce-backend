@@ -136,35 +136,30 @@ class OrderViewSet(viewsets.ModelViewSet):
             cart_items.delete()
             # Send email asynchronously with Celery
 
-            if hasattr(settings, 'SENDGRID_API_KEY'):
-                sg = sendgrid.SendGridAPIClient(api_key=settings.SENDGRID_API_KEY)
-                message = Mail(
-                    from_email='noreply@yourstore.com',
-                    to_emails=request.user.email,
-                    subject=f'Order #{order.id} Confirmed! 🎉',
-                    plain_text_content=f'''
-                    Thank you for your order!
-                    Order ID: #{order.id}
-                    Total: ₹{final_amount}
-                    Tracking: {order.tracking_number}
-                    We'll ship soon!
-                    '''
-                    )
-    
-            try:
-                response = sg.send(message)
-                print(f"Email sent! Status: {response.status_code}")
-            except Exception as e:
-                print(f"Email failed: {e}")
+           # After cart_items.delete():
+        try:
+            from sendgrid import SendGridAPIClient
+            from sendgrid.helpers.mail import Mail
+            
+            sg = SendGridAPIClient(api_key=settings.SENDGRID_API_KEY)
+            message = Mail(
+                from_email='noreply@yourstore.com',
+                to_emails=request.user.email,
+                subject=f'Order #{order.id} Confirmed! 🎉',
+                plain_text_content=f'''
+                Thank you for your order!
+                Order ID: #{order.id}
+                Total: ₹{final_amount}
+                Tracking: {order.tracking_number}
+                '''
+            )
+            response = sg.send(message)
+            print(f"Email sent! Status: {response.status_code}")
+        except ImportError:
+            print("SendGrid not installed")
+        except Exception as e:
+            print(f"Email failed: {e}")
 
-                    Notification.objects.create(
-                        user=request.user,
-                        title="Order Placed Successfully! 🎉",
-                        message=f"Your order #{order.id} has been placed. Total: ₹{final_amount}. Tracking: {order.tracking_number}",
-                        notification_type="order"
-                    )
-                    serializer = self.get_serializer(order)
-                    return Response(serializer.data, status=status.HTTP_201_CREATED)
                     
     
     def generate_tracking_number(self):
