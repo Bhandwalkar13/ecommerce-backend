@@ -9,6 +9,10 @@ from django.conf import settings
 from datetime import timedelta
 from .models import *
 from .serializers import *
+import sendgrid
+from sendgrid.helpers.mail import Mail
+from django.conf import settings
+
 
 class ProductViewSet(viewsets.ModelViewSet):
     queryset = Product.objects.all()
@@ -131,23 +135,37 @@ class OrderViewSet(viewsets.ModelViewSet):
             cart_item.product.save()
             cart_items.delete()
             # Send email asynchronously with Celery
-            
-            send_order_email_task.delay(
-                request.user.email,
-                order.id,
-                final_amount,
-                order.tracking_number
-                )
 
-            Notification.objects.create(
-                user=request.user,
-                title="Order Placed Successfully! 🎉",
-                message=f"Your order #{order.id} has been placed. Total: ₹{final_amount}. Tracking: {order.tracking_number}",
-                notification_type="order"
-            )
-            serializer = self.get_serializer(order)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-            
+            if hasattr(settings, 'SENDGRID_API_KEY'):
+                sg = sendgrid.SendGridAPIClient(api_key=settings.SENDGRID_API_KEY)
+                message = Mail(
+                    from_email='noreply@yourstore.com',
+                    to_emails=request.user.email,
+                    subject=f'Order #{order.id} Confirmed! 🎉',
+                    plain_text_content=f'''
+                    Thank you for your order!
+                    Order ID: #{order.id}
+                    Total: ₹{final_amount}
+                    Tracking: {order.tracking_number}
+                    We'll ship soon!
+                    '''
+                    )
+    
+            try:
+                response = sg.send(message)
+                print(f"Email sent! Status: {response.status_code}")
+            except Exception as e:
+                print(f"Email failed: {e}")
+
+                    Notification.objects.create(
+                        user=request.user,
+                        title="Order Placed Successfully! 🎉",
+                        message=f"Your order #{order.id} has been placed. Total: ₹{final_amount}. Tracking: {order.tracking_number}",
+                        notification_type="order"
+                    )
+                    serializer = self.get_serializer(order)
+                    return Response(serializer.data, status=status.HTTP_201_CREATED)
+                    
     
     def generate_tracking_number(self):
         import random
