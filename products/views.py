@@ -130,10 +130,15 @@ class OrderViewSet(viewsets.ModelViewSet):
             cart_item.product.stock_quantity -= cart_item.quantity
             cart_item.product.save()
             cart_items.delete()
-        # try:
-        #     self.send_order_email(request.user, order)
-        # except Exception as e:
-        #     print(f"Email failed: {e}")
+            # Send email asynchronously with Celery
+            
+            send_order_email_task.delay(
+                request.user.email,
+                order.id,
+                final_amount,
+                order.tracking_number
+                )
+
             Notification.objects.create(
                 user=request.user,
                 title="Order Placed Successfully! 🎉",
@@ -487,3 +492,4 @@ class PaymentViewSet(viewsets.ViewSet):
             'success': True,
             'message': 'Payment verified successfully'
         })
+

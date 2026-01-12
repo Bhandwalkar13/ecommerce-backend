@@ -188,4 +188,12 @@ EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', 'sbhandwalkar25@gmail.com')
 EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', 'ttll dohn nhqg fzpj')
 DEFAULT_FROM_EMAIL = os.environ.get('EMAIL_HOST_USER', 'sbhandwalkar25@gmail.com')
 
+# Celery Configuration
+CELERY_BROKER_URL = os.environ.get('REDIS_URL', 'redis://localhost:6379')
+CELERY_RESULT_BACKEND = os.environ.get('REDIS_URL', 'redis://localhost:6379')
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_TIMEZONE = 'Asia/Kolkata'
+
 
