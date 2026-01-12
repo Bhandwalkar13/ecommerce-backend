@@ -181,7 +181,7 @@ SIMPLE_JWT = {
 
 # Email Configuration
 # SendGrid Configuration
-SENDGRID_API_KEY = os.environ.get('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')
+#SENDGRID_API_KEY = os.environ.get('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')
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.sendgrid.net'
 EMAIL_PORT = 587
@@ -190,12 +190,5 @@ EMAIL_HOST_USER = 'apikey'
 EMAIL_HOST_PASSWORD = os.environ.get('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')
 
 
-# Celery Configuration
-CELERY_BROKER_URL = os.environ.get('REDIS_URL', 'redis://localhost:6379')
-CELERY_RESULT_BACKEND = os.environ.get('REDIS_URL', 'redis://localhost:6379')
-CELERY_ACCEPT_CONTENT = ['json']
-CELERY_TASK_SERIALIZER = 'json'
-CELERY_RESULT_SERIALIZER = 'json'
-CELERY_TIMEZONE = 'Asia/Kolkata'
 
 

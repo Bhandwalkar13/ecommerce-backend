@@ -137,7 +137,7 @@ class OrderViewSet(viewsets.ModelViewSet):
             # Send email asynchronously with Celery
 
            # After cart_items.delete():
-        try:
+        '''try:
             from sendgrid import SendGridAPIClient
             from sendgrid.helpers.mail import Mail
             
@@ -159,7 +159,7 @@ class OrderViewSet(viewsets.ModelViewSet):
             print("SendGrid not installed")
         except Exception as e:
             print(f"Email failed: {e}")
-
+'''
                     
     
     def generate_tracking_number(self):
